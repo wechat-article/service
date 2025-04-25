@@ -1,0 +1,32 @@
+{
+  "name": "service",
+  "version": "0.0.1",
+  "description": "文章下载增强服务",
+  "author": "Jock",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wechat-article/service.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/wechat-article/service/issues"
+  },
+  "homepage": "https://github.com/wechat-article/service#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "prettier": "^3.5.3"
+  },
+  "dependencies": {
+    "puppeteer": "^24.7.2"
+  }
+}
