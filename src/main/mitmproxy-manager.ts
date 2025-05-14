@@ -4,6 +4,7 @@ import path from 'node:path'
 import { log } from './logger'
 import mitm from '../../resources/mitm/mitm?asset&asarUnpack'
 import plugin from '../../resources/credential.py?asset&asarUnpack'
+import { onMitmproxyStart, onMitmproxyStop } from './index'
 
 export const credentialJsonPath = path.join(app.getPath('userData'), 'credentials.json')
 
@@ -52,6 +53,7 @@ export class MitmproxyManager {
           log('mitmproxy 启动成功，端口:', port)
           this._port = port
           this._process = _process
+          onMitmproxyStart()
         }
       })
     })
@@ -67,11 +69,13 @@ export class MitmproxyManager {
           this._port = null
           log('mitmproxy 进程关闭成功')
           resolve(true)
+          onMitmproxyStop()
         })
         this._process.kill()
       } else {
         log('mitmproxy 进程已不存在')
         resolve(true)
+        onMitmproxyStop()
       }
     })
   }

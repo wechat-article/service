@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain } from 'electron'
+import { BrowserWindow, dialog, ipcMain, app } from 'electron'
 import { findIndexHtmlFiles, generatePDf, startFileServer } from './utils'
 import { getSystemProxy } from 'os-proxy-config'
 import osProxy from 'cross-os-proxy'
@@ -42,15 +42,11 @@ export function handleIPC(): void {
   })
   // 启动 mitmproxy 进程
   ipcMain.handle('start-mitmproxy', async () => {
-    const port = await MitmproxyManager.startup()
-    await osProxy.setProxy('127.0.0.1', port)
-    await CredentialWatcher.listen()
-    return port
+    return startMitmProxy()
   })
   // 关闭 mitmproxy 进程
   ipcMain.handle('stop-mitmproxy', async () => {
-    await osProxy.closeProxy()
-    return MitmproxyManager.close()
+    return stopMitmProxy()
   })
   ipcMain.handle('get-mitmproxy-port', () => {
     return MitmproxyManager.port
@@ -61,4 +57,19 @@ export function handleIPC(): void {
   ipcMain.handle('get-ws-clients', () => {
     return CredentialWatcher.clients
   })
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion()
+  })
+}
+
+export async function startMitmProxy(): Promise<number> {
+  const port = await MitmproxyManager.startup()
+  await osProxy.setProxy('127.0.0.1', port)
+  await CredentialWatcher.listen()
+  return port
+}
+
+export async function stopMitmProxy() {
+  await osProxy.closeProxy()
+  return MitmproxyManager.close()
 }

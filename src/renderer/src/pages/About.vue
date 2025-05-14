@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 const versions = reactive({ ...window.electron.process.versions })
+const appVersion = ref('')
+onMounted(async () => {
+  appVersion.value = await window.electron.ipcRenderer.invoke('get-app-version')
+})
 </script>
 
 <template>
@@ -12,11 +16,11 @@ const versions = reactive({ ...window.electron.process.versions })
         <li class="electron-version">Electron v{{ versions.electron }}</li>
         <li class="chrome-version">Chromium v{{ versions.chrome }}</li>
         <li class="node-version">Node v{{ versions.node }}</li>
-        <li class="node-version">App v1.0.0</li>
+        <li class="node-version">App v{{ appVersion }}</li>
       </ul>
     </section>
     <section>
-      <h3>开发者：</h3>
+      <h3>开发者信息：</h3>
       <p>jooooock</p>
       <p><a href="https://github.com/jooooock" target="_blank">GitHub</a></p>
     </section>

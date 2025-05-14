@@ -5,6 +5,7 @@
   "main": "./out/main/index.js",
   "author": "jock<findsource@proton.me>",
   "homepage": "https://exporter.wxdown.online",
+  "license": "MIT",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",

@@ -1,9 +1,18 @@
-import { app, BrowserWindow, Menu, shell, Tray } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItem,
+  shell,
+  Tray,
+  MenuItemConstructorOptions
+} from 'electron'
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-import trayIcon from '../../resources/red.png?asset'
-import { handleIPC } from './ipc'
+import icon from '../../resources/logo.png?asset'
+import trayRedIcon from '../../resources/red.png?asset'
+import trayGreenIcon from '../../resources/green.png?asset'
+import { handleIPC, stopMitmProxy, startMitmProxy } from './ipc'
 import { cleanup } from './utils'
 import { log } from './logger'
 
@@ -13,6 +22,8 @@ function createWindow(): BrowserWindow {
     width: 900,
     height: 670,
     show: false,
+    backgroundColor: '#2e2c29',
+    icon: icon,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -21,7 +32,7 @@ function createWindow(): BrowserWindow {
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
 
@@ -41,6 +52,7 @@ function createWindow(): BrowserWindow {
 }
 
 let tray: Tray | null = null
+let menu: Menu | null = null
 
 app.whenReady().then(() => {
   // Set app user model id for windows
@@ -64,12 +76,34 @@ app.whenReady().then(() => {
     }
   })
 
-  tray = new Tray(trayIcon)
+  tray = new Tray(trayRedIcon)
 
-  const contextMenu = Menu.buildFromTemplate([
+  menu = Menu.buildFromTemplate([
+    {
+      id: 'proxyStatus',
+      label: '状态: 关闭',
+      enabled: false
+    },
     { type: 'separator' },
     {
-      label: 'Show',
+      id: 'startProxy',
+      label: '开启',
+      enabled: true,
+      click: async function () {
+        await startMitmProxy()
+      }
+    },
+    {
+      id: 'stopProxy',
+      label: '关闭',
+      enabled: false,
+      click: async () => {
+        await stopMitmProxy()
+      }
+    },
+    { type: 'separator' },
+    {
+      label: '显示',
       click: () => {
         const wins = BrowserWindow.getAllWindows()
         if (wins.length === 0) {
@@ -80,14 +114,47 @@ app.whenReady().then(() => {
       }
     },
     {
-      label: 'Quit',
+      label: '退出',
       role: 'quit',
       accelerator: 'CommandOrControl+Q'
     }
   ])
 
-  tray.setContextMenu(contextMenu)
+  tray.setContextMenu(menu)
 })
+
+export function onMitmproxyStart() {
+  if (!menu || !tray) {
+    return
+  }
+  tray!.setImage(trayGreenIcon)
+
+  // 获取当前菜单项并更新
+  const updatedMenuItems: (MenuItemConstructorOptions | MenuItem)[] = menu.items.map((item) => ({
+    ...item,
+    label: item.id === 'proxyStatus' ? '代理状态: 开启' : item.label,
+    enabled: item.id === 'startProxy' ? false : item.id === 'stopProxy' ? true : item.enabled
+  }))
+  menu = Menu.buildFromTemplate(updatedMenuItems)
+
+  tray.setContextMenu(menu)
+}
+export function onMitmproxyStop() {
+  if (!menu || !tray) {
+    return
+  }
+  tray!.setImage(trayRedIcon)
+
+  // 获取当前菜单项并更新
+  const updatedMenuItems: (MenuItemConstructorOptions | MenuItem)[] = menu.items.map((item) => ({
+    ...item,
+    label: item.id === 'proxyStatus' ? '代理状态: 关闭' : item.label,
+    enabled: item.id === 'startProxy' ? true : item.id === 'stopProxy' ? false : item.enabled
+  }))
+  menu = Menu.buildFromTemplate(updatedMenuItems)
+
+  tray.setContextMenu(menu)
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

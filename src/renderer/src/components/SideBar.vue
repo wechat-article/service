@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const model = defineModel<string>({ required: true })
-const items = [{ label: '格式转换' }, { label: '系统代理' }, { label: '关于' }]
+const items = [
+  { id: 'proxy', label: '代理设置' },
+  { id: 'formatter', label: '格式转换' },
+  { id: 'about', label: '关于' }
+]
 </script>
 
 <template>
@@ -8,9 +12,9 @@ const items = [{ label: '格式转换' }, { label: '系统代理' }, { label: '�
     <ul>
       <li
         v-for="item in items"
-        :key="item.label"
-        :class="{ active: model === item.label }"
-        @click="model = item.label"
+        :key="item.id"
+        :class="{ active: model === item.id }"
+        @click="model = item.id"
       >
         {{ item.label }}
       </li>
