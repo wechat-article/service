@@ -1,0 +1,64 @@
+import { BrowserWindow, dialog, ipcMain } from 'electron'
+import { findIndexHtmlFiles, generatePDf, startFileServer } from './utils'
+import { getSystemProxy } from 'os-proxy-config'
+import osProxy from 'cross-os-proxy'
+import { MitmproxyManager } from './mitmproxy-manager'
+import { CredentialWatcher } from './credential-watcher'
+
+export function handleIPC(): void {
+  // 选择目录
+  ipcMain.handle('dialog:open', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const { canceled, filePaths } = await dialog.showOpenDialog(win!, {
+      title: '选择 HTML 文件根目录',
+      properties: ['openDirectory']
+    })
+    if (!canceled) {
+      return filePaths[0]
+    }
+    return null
+  })
+
+  // 查询 html 文件
+  ipcMain.handle('query:html-files', async (_, dir) => {
+    return findIndexHtmlFiles(dir)
+  })
+
+  // 启动文件服务器
+  ipcMain.handle('start:file-server', async (_, dir) => {
+    const server = await startFileServer(dir)
+    const port = (server.address() as { port: number }).port
+    return `http://127.0.0.1:${port}/`
+  })
+
+  // 生成 pdf 服务
+  ipcMain.handle('generate:pdf', async (_, url, outDir) => {
+    await generatePDf(url, outDir)
+  })
+
+  // 查询系统代理配置
+  ipcMain.handle('get-system-proxy', async () => {
+    return getSystemProxy()
+  })
+  // 启动 mitmproxy 进程
+  ipcMain.handle('start-mitmproxy', async () => {
+    const port = await MitmproxyManager.startup()
+    await osProxy.setProxy('127.0.0.1', port)
+    await CredentialWatcher.listen()
+    return port
+  })
+  // 关闭 mitmproxy 进程
+  ipcMain.handle('stop-mitmproxy', async () => {
+    await osProxy.closeProxy()
+    return MitmproxyManager.close()
+  })
+  ipcMain.handle('get-mitmproxy-port', () => {
+    return MitmproxyManager.port
+  })
+  ipcMain.handle('get-ws-port', () => {
+    return CredentialWatcher.port
+  })
+  ipcMain.handle('get-ws-clients', () => {
+    return CredentialWatcher.clients
+  })
+}

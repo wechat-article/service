@@ -1,0 +1,32 @@
+@import './base.css';
+
+body {
+  overflow: hidden;
+  background-size: cover;
+}
+
+code {
+  font-weight: 600;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background-color: var(--color-background-mute);
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
+  font-size: 85%;
+}
+
+#app {
+  display: flex;
+}
+
+#content-view {
+  flex: 1;
+  padding: 20px;
+  height: 100%;
+}
