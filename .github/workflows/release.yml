@@ -19,6 +19,11 @@ jobs:
       - name: 拉取代码
         uses: actions/checkout@v4
 
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
       - name: 安装依赖
         run: npm install
 
