@@ -22,7 +22,6 @@ function createWindow(): BrowserWindow {
     width: 900,
     height: 670,
     show: false,
-    backgroundColor: '#2e2c29',
     icon: icon,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -114,6 +113,13 @@ app.whenReady().then(() => {
       }
     },
     {
+      label: '打开开发者工具',
+      click: () => {
+        const win = BrowserWindow.getAllWindows()[0]
+        win.webContents.openDevTools({ mode: 'detach' })
+      }
+    },
+    {
       label: '退出',
       role: 'quit',
       accelerator: 'CommandOrControl+Q'
@@ -158,7 +164,8 @@ export function onMitmproxyStop() {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    // 有托盘，所以不需要退出
+    // app.quit()
   }
 })
 

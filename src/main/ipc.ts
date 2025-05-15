@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain, app } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { findIndexHtmlFiles, generatePDf, startFileServer } from './utils'
 import { getSystemProxy } from 'os-proxy-config'
 import osProxy from 'cross-os-proxy'
@@ -38,7 +38,7 @@ export function handleIPC(): void {
 
   // 查询系统代理配置
   ipcMain.handle('get-system-proxy', async () => {
-    return getSystemProxy()
+    return await getSystemProxy()
   })
   // 启动 mitmproxy 进程
   ipcMain.handle('start-mitmproxy', async () => {

@@ -15,6 +15,7 @@ declare module 'vue' {
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputText: typeof import('primevue/inputtext')['default']
     SideBar: typeof import('./src/components/SideBar.vue')['default']
+    SwitchProxy: typeof import('./src/components/SwitchProxy.vue')['default']
     Textarea: typeof import('primevue/textarea')['default']
   }
 }

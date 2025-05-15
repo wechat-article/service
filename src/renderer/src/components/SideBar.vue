@@ -1,29 +1,27 @@
 <script setup lang="ts">
-const model = defineModel<string>({ required: true })
-const items = [
-  { id: 'proxy', label: '代理设置' },
-  { id: 'formatter', label: '格式转换' },
-  { id: 'about', label: '关于' }
-]
+import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import SwitchProxy from '@renderer/components/SwitchProxy.vue'
+
+const router = useRouter()
+const routes = ref(router.getRoutes().filter((route) => route.meta && route.meta.title))
 </script>
 
 <template>
   <aside>
     <ul>
-      <li
-        v-for="item in items"
-        :key="item.id"
-        :class="{ active: model === item.id }"
-        @click="model = item.id"
-      >
-        {{ item.label }}
+      <li v-for="route in routes" :key="route.path">
+        <RouterLink :to="route.path">{{ route.meta.title }}</RouterLink>
       </li>
     </ul>
+    <SwitchProxy />
   </aside>
 </template>
 
 <style scoped>
 aside {
+  display: flex;
+  flex-direction: column;
   background: #e8e8e8;
   width: 200px;
   color: black;
@@ -32,17 +30,27 @@ aside {
 }
 
 ul {
+  flex: 1;
   padding: 10px;
 }
 
-li {
+li > a {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
   padding: 5px 10px;
+  text-decoration: none;
+  color: #333;
+  border-radius: 5px;
 }
 
-li.active {
+li > a:hover {
+  background: #dcdcdc;
+}
+
+li > a.router-link-active {
   background: cornflowerblue;
   color: white;
   font-weight: bold;
-  border-radius: 5px;
 }
 </style>
