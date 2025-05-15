@@ -96,7 +96,7 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <div class="notifications">
+    <div class="notifications" v-if="showWarning || !certificateInstalled">
       <Message v-if="showWarning" severity="warn"
         >注意：mitmproxy 代理地址与系统代理设置不一致，请检查是否有开启其他 VPN 服务。</Message
       >

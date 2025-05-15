@@ -30,13 +30,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-section:not(:first-child) {
-  margin-block: 30px;
-}
-section h3 {
-  font-weight: bold;
-}
-
 ul {
   padding: 0;
   font-family: 'Menlo', 'Lucida Console', monospace;

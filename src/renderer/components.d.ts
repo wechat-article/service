@@ -9,17 +9,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Button: typeof import('primevue/button')['default']
-    Divider: typeof import('primevue/divider')['default']
     Fieldset: typeof import('primevue/fieldset')['default']
-    FloatLabel: typeof import('primevue/floatlabel')['default']
-    InputGroup: typeof import('primevue/inputgroup')['default']
-    InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
-    InputText: typeof import('primevue/inputtext')['default']
     Message: typeof import('primevue/message')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideBar: typeof import('./src/components/SideBar.vue')['default']
     SwitchProxy: typeof import('./src/components/SwitchProxy.vue')['default']
-    Textarea: typeof import('primevue/textarea')['default']
   }
 }

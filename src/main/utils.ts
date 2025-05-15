@@ -187,7 +187,6 @@ export async function verifyMitmproxy() {
         data += chunk
       })
       res.on('end', () => {
-        console.log(data)
         if (/If you can see this, traffic is not passing through mitmproxy/.test(data)) {
           resolve(false)
         } else {
