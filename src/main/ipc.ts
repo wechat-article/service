@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import {
+  checkCertificateExists,
   findIndexHtmlFiles,
   generatePDf,
   startFileServer,
@@ -68,5 +69,8 @@ export function handleIPC(): void {
   })
   ipcMain.handle('verify-mitmproxy', async () => {
     return verifyMitmproxy()
+  })
+  ipcMain.handle('check-certificate-exists', async () => {
+    return checkCertificateExists()
   })
 }

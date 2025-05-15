@@ -66,12 +66,15 @@ const btnSeverity = computed(() => {
     return 'info'
   }
 })
+const certificateInstalled = ref(true)
 async function verify() {
   btnLoading.value = true
   proxyVerified.value = undefined
   await new Promise((resolve) => setTimeout(resolve, 500))
   proxyVerified.value = await window.electron.ipcRenderer.invoke('verify-mitmproxy')
   btnLoading.value = false
+
+  certificateInstalled.value = await window.electron.ipcRenderer.invoke('check-certificate-exists')
 }
 
 function query() {
@@ -93,9 +96,15 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <Message v-if="showWarning" severity="warn"
-      >注意：mitmproxy 代理地址与系统代理设置不一致，请检查是否有开启其他 VPN 服务。</Message
-    >
+    <div class="notifications">
+      <Message v-if="showWarning" severity="warn"
+        >注意：mitmproxy 代理地址与系统代理设置不一致，请检查是否有开启其他 VPN 服务。</Message
+      >
+      <Message v-if="!certificateInstalled" severity="warn"
+        >系统中未检测到 mitmproxy 的证书，请按照
+        <a href="http://mitm.it/" target="_blank">http://mitm.it/</a> 的指示安装证书。</Message
+      >
+    </div>
     <section>
       <Fieldset legend="系统代理">
         <p v-if="systemProxyAddress" class="code no-scrollbar">{{ systemProxyAddress }}</p>
@@ -119,3 +128,11 @@ onUnmounted(() => {
     ></Button>
   </div>
 </template>
+
+<style scoped>
+.notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+</style>

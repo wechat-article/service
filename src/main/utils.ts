@@ -8,6 +8,7 @@ import { log } from './logger'
 import { CredentialWatcher } from './credential-watcher'
 import { getSystemProxy } from 'os-proxy-config'
 import { HttpsProxyAgent } from 'https-proxy-agent'
+import { exec } from 'node:child_process'
 
 interface Resource {
   fileServer: Map<string, http.Server>
@@ -194,5 +195,17 @@ export async function verifyMitmproxy() {
         }
       })
     })
+  })
+}
+
+// 检查 mitmproxy 证书是否已经安装
+export function checkCertificateExists() {
+  return new Promise((resolve) => {
+    exec(
+      `security find-certificate -a -c "mitmproxy" /Library/Keychains/System.keychain`,
+      (error, stdout, stderr) => {
+        resolve(!error && !stderr && stdout)
+      }
+    )
   })
 }
