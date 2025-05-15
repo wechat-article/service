@@ -63,6 +63,9 @@ function copy() {
         已连接客户端: <span class="num">{{ wsClients }}</span>
       </p>
     </section>
+    <section>
+      <Fieldset legend="Credentials 列表"></Fieldset>
+    </section>
   </div>
 </template>
 
@@ -73,6 +76,7 @@ function copy() {
 .flex {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 .code .icon {
   cursor: pointer;

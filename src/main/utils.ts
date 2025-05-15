@@ -9,6 +9,7 @@ import { CredentialWatcher } from './credential-watcher'
 import { getSystemProxy } from 'os-proxy-config'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { exec } from 'node:child_process'
+import { shell } from 'electron'
 
 interface Resource {
   fileServer: Map<string, http.Server>
@@ -207,4 +208,8 @@ export function checkCertificateExists() {
       }
     )
   })
+}
+
+export function openDirectory(directory: string) {
+  return shell.openPath(directory)
 }

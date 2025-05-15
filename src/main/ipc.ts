@@ -3,6 +3,7 @@ import {
   checkCertificateExists,
   findIndexHtmlFiles,
   generatePDf,
+  openDirectory,
   startFileServer,
   startMitmProxy,
   stopMitmProxy,
@@ -11,6 +12,7 @@ import {
 import { getSystemProxy } from 'os-proxy-config'
 import { MitmproxyManager } from './mitmproxy-manager'
 import { CredentialWatcher } from './credential-watcher'
+import path from 'node:path'
 
 export function handleIPC(): void {
   // 选择目录
@@ -72,5 +74,10 @@ export function handleIPC(): void {
   })
   ipcMain.handle('check-certificate-exists', async () => {
     return checkCertificateExists()
+  })
+  ipcMain.handle('open-logs-directory', () => {
+    const dataPath = app.getPath('userData')
+    const logsRoot = path.join(dataPath, 'logs')
+    return openDirectory(logsRoot)
   })
 }

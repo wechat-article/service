@@ -1,11 +1,26 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const versions = reactive({ ...window.electron.process.versions })
 const appVersion = ref('')
 onMounted(async () => {
   appVersion.value = await window.electron.ipcRenderer.invoke('get-app-version')
 })
+
+async function openLogs() {
+  const error = await window.electron.ipcRenderer.invoke('open-logs-directory')
+  if (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error Message',
+      detail: error,
+      life: 3000
+    })
+  }
+}
 </script>
 
 <template>
@@ -24,6 +39,11 @@ onMounted(async () => {
       <Fieldset legend="开发者信息">
         <p>jooooock</p>
         <p><a href="https://github.com/jooooock" target="_blank">GitHub</a></p>
+      </Fieldset>
+    </section>
+    <section>
+      <Fieldset legend="日志">
+        <Button severity="info" @click="openLogs">查看系统日志</Button>
       </Fieldset>
     </section>
   </div>
