@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const systemProxyAddress = ref('')
 
@@ -23,8 +23,55 @@ async function queryMitmproxyPort(): Promise<void> {
   }
 }
 
+const showWarning = computed(() => {
+  if (systemProxyAddress.value && mitmproxyAddress.value) {
+    try {
+      return (
+        JSON.parse(systemProxyAddress.value).proxyUrl.replace('localhost', '127.0.0.1') !==
+        mitmproxyAddress.value
+      )
+    } catch (e) {
+      return false
+    }
+  }
+  return false
+})
+
+const btnLoading = ref(false)
+const proxyVerified = ref()
+const btnIcon = computed(() => {
+  if (proxyVerified.value) {
+    return 'pi pi-check'
+  } else {
+    return ''
+  }
+})
+const btnLabel = computed(() => {
+  if (btnLoading.value) {
+    return '检查中'
+  } else if (proxyVerified.value) {
+    return '代理设置正确'
+  } else if (proxyVerified.value === false) {
+    return '代理设置有误，重新检查'
+  } else {
+    return '检查代理设置是否正确'
+  }
+})
+const btnSeverity = computed(() => {
+  if (proxyVerified.value) {
+    return 'success'
+  } else if (proxyVerified.value === false) {
+    return 'danger'
+  } else {
+    return 'info'
+  }
+})
 async function verify() {
-  window.open('http://mitm.it', '_blank')
+  btnLoading.value = true
+  proxyVerified.value = undefined
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  proxyVerified.value = await window.electron.ipcRenderer.invoke('verify-mitmproxy')
+  btnLoading.value = false
 }
 
 function query() {
@@ -46,46 +93,29 @@ onUnmounted(() => {
 
 <template>
   <div>
+    <Message v-if="showWarning" severity="warn"
+      >注意：mitmproxy 代理地址与系统代理设置不一致，请检查是否有开启其他 VPN 服务。</Message
+    >
     <section>
-      <h3>当前系统代理：</h3>
-      <p v-if="systemProxyAddress" class="code">{{ systemProxyAddress }}</p>
-      <p v-else style="color: red">未设置</p>
+      <Fieldset legend="系统代理">
+        <p v-if="systemProxyAddress" class="code no-scrollbar">{{ systemProxyAddress }}</p>
+        <p v-else style="color: red">未设置</p>
+      </Fieldset>
     </section>
-    <section class="relative">
-      <h3>内置 mitmproxy 代理：</h3>
-      <p v-if="mitmproxyAddress">{{ mitmproxyAddress }}</p>
-      <p v-else style="color: red">未启动</p>
-      <Button v-if="mitmproxyAddress" class="btn" severity="info" @click="verify"
-        >验证代理是否设置正确</Button
-      >
+    <section>
+      <Fieldset legend="内置 mitmproxy 代理">
+        <p v-if="mitmproxyAddress" class="code">{{ mitmproxyAddress }}</p>
+        <p v-else style="color: red">未启动</p>
+      </Fieldset>
     </section>
+    <Button
+      v-if="mitmproxyAddress"
+      :icon="btnIcon"
+      :loading="btnLoading"
+      :label="btnLabel"
+      class="btn"
+      :severity="btnSeverity"
+      @click="verify"
+    ></Button>
   </div>
 </template>
-
-<style scoped>
-section:not(:first-child) {
-  margin-block: 30px;
-}
-
-section h3 {
-  font-weight: bold;
-}
-
-section .code {
-  font-family: 'Menlo', 'Lucida Console', monospace;
-  white-space: pre;
-  font-size: 16px;
-  background: #eaeaea;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
-.relative {
-  position: relative;
-}
-.btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-</style>

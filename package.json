@@ -26,6 +26,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "cross-os-proxy": "^2.3.2",
     "dayjs": "^1.11.13",
+    "https-proxy-agent": "^7.0.6",
     "os-proxy-config": "^1.1.2",
     "puppeteer": "^24.7.2",
     "ws": "^8.18.2"

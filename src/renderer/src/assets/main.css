@@ -1,26 +1,5 @@
 @import './base.css';
 
-body {
-  overflow: hidden;
-  background-size: cover;
-}
-
-code {
-  font-weight: 600;
-  padding: 3px 5px;
-  border-radius: 2px;
-  background-color: var(--color-background-mute);
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    Liberation Mono,
-    monospace;
-  font-size: 85%;
-}
-
 #app {
   display: flex;
 }
@@ -29,4 +8,30 @@ code {
   flex: 1;
   padding: 20px;
   height: 100%;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+section:not(:first-child) {
+  margin-block: 30px;
+}
+
+section .code {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
+  white-space: pre;
+  max-height: 150px;
+  overflow: auto;
 }

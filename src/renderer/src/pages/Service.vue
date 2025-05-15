@@ -43,38 +43,39 @@ onUnmounted(() => {
 <template>
   <div>
     <section class="relative">
-      <h3>Credentials 监听地址：</h3>
-      <p v-if="wsAddress">{{ wsAddress }}</p>
-      <p v-else style="color: red">未启动</p>
-      <p class="btn">连接客户端数: {{ wsClients }}</p>
+      <Fieldset legend="Credentials 监听地址">
+        <p v-if="wsAddress" class="code">{{ wsAddress }}</p>
+        <p v-else style="color: red">未启动</p>
+      </Fieldset>
+      <p class="btn">
+        已连接客户端: <span class="num">{{ wsClients }}</span>
+      </p>
     </section>
   </div>
 </template>
 
 <style scoped>
-section:not(:first-child) {
-  margin-block: 30px;
-}
-
-section h3 {
-  font-weight: bold;
-}
-
-section .code {
-  font-family: 'Menlo', 'Lucida Console', monospace;
-  white-space: pre;
-  font-size: 16px;
-  background: #eaeaea;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
 .relative {
   position: relative;
 }
+
 .btn {
   position: absolute;
-  right: 0;
-  top: 0;
+  top: 25px;
+  right: 10px;
+}
+
+.num {
+  font-size: 20px;
+  font-weight: bold;
+  color: #e95020;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
 }
 </style>

@@ -1,7 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import { findIndexHtmlFiles, generatePDf, startFileServer } from './utils'
+import {
+  findIndexHtmlFiles,
+  generatePDf,
+  startFileServer,
+  startMitmProxy,
+  stopMitmProxy,
+  verifyMitmproxy
+} from './utils'
 import { getSystemProxy } from 'os-proxy-config'
-import osProxy from 'cross-os-proxy'
 import { MitmproxyManager } from './mitmproxy-manager'
 import { CredentialWatcher } from './credential-watcher'
 
@@ -60,16 +66,7 @@ export function handleIPC(): void {
   ipcMain.handle('get-app-version', () => {
     return app.getVersion()
   })
-}
-
-export async function startMitmProxy(): Promise<number> {
-  const port = await MitmproxyManager.startup()
-  await osProxy.setProxy('127.0.0.1', port)
-  await CredentialWatcher.listen()
-  return port
-}
-
-export async function stopMitmProxy() {
-  await osProxy.closeProxy()
-  return MitmproxyManager.close()
+  ipcMain.handle('verify-mitmproxy', async () => {
+    return verifyMitmproxy()
+  })
 }

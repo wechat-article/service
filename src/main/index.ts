@@ -12,8 +12,8 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/logo.png?asset'
 import trayRedIcon from '../../resources/red.png?asset'
 import trayGreenIcon from '../../resources/green.png?asset'
-import { handleIPC, stopMitmProxy, startMitmProxy } from './ipc'
-import { cleanup } from './utils'
+import { handleIPC } from './ipc'
+import { cleanup, startMitmProxy, stopMitmProxy } from './utils'
 import { log } from './logger'
 
 function createWindow(): BrowserWindow {

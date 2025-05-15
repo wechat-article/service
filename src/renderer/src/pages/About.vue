@@ -11,18 +11,20 @@ onMounted(async () => {
 <template>
   <div>
     <section>
-      <h3>版本信息：</h3>
-      <ul class="versions">
-        <li class="electron-version">Electron v{{ versions.electron }}</li>
-        <li class="chrome-version">Chromium v{{ versions.chrome }}</li>
-        <li class="node-version">Node v{{ versions.node }}</li>
-        <li class="node-version">App v{{ appVersion }}</li>
-      </ul>
+      <Fieldset legend="版本信息">
+        <ul class="versions">
+          <li class="electron-version">Electron v{{ versions.electron }}</li>
+          <li class="chrome-version">Chromium v{{ versions.chrome }}</li>
+          <li class="node-version">Node v{{ versions.node }}</li>
+          <li class="node-version">App v{{ appVersion }}</li>
+        </ul>
+      </Fieldset>
     </section>
     <section>
-      <h3>开发者信息：</h3>
-      <p>jooooock</p>
-      <p><a href="https://github.com/jooooock" target="_blank">GitHub</a></p>
+      <Fieldset legend="开发者信息">
+        <p>jooooock</p>
+        <p><a href="https://github.com/jooooock" target="_blank">GitHub</a></p>
+      </Fieldset>
     </section>
   </div>
 </template>

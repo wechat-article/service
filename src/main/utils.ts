@@ -1,9 +1,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import http from 'node:http'
+import osProxy from 'cross-os-proxy'
 import puppeteer, { Browser } from 'puppeteer'
 import { MitmproxyManager } from './mitmproxy-manager'
 import { log } from './logger'
+import { CredentialWatcher } from './credential-watcher'
+import { getSystemProxy } from 'os-proxy-config'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 
 interface Resource {
   fileServer: Map<string, http.Server>
@@ -140,6 +144,7 @@ export async function generatePDf(url: string, outDir: string): Promise<void> {
 export async function cleanup(): Promise<void> {
   log('开始清理资源...')
   await MitmproxyManager.close()
+  await osProxy.closeProxy()
   if (_resource.browser) {
     log('关闭浏览器')
     await _resource.browser.close()
@@ -152,4 +157,42 @@ export async function cleanup(): Promise<void> {
     })
   }
   log('资源清理完毕.')
+}
+
+export async function startMitmProxy(): Promise<number> {
+  const port = await MitmproxyManager.startup()
+  await osProxy.setProxy('127.0.0.1', port)
+  await CredentialWatcher.listen()
+  return port
+}
+
+export async function stopMitmProxy() {
+  await osProxy.closeProxy()
+  return MitmproxyManager.close()
+}
+
+// 验证 mitmproxy 代理设置是否正确
+export async function verifyMitmproxy() {
+  const proxy = await getSystemProxy()
+  if (!proxy || !proxy.proxyUrl) {
+    return false
+  }
+
+  return new Promise((resolve) => {
+    const agent = new HttpsProxyAgent(proxy.proxyUrl)
+    http.get('http://mitm.it', { agent }, (res) => {
+      let data = ''
+      res.on('data', (chunk) => {
+        data += chunk
+      })
+      res.on('end', () => {
+        console.log(data)
+        if (/If you can see this, traffic is not passing through mitmproxy/.test(data)) {
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      })
+    })
+  })
 }

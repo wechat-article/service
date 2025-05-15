@@ -49,8 +49,8 @@ li > a:hover {
 }
 
 li > a.router-link-active {
-  background: cornflowerblue;
+  background: var(--primary-color);
   color: white;
-  font-weight: bold;
+  font-weight: 500;
 }
 </style>

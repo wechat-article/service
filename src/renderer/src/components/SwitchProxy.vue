@@ -54,7 +54,7 @@ onUnmounted(() => {
       class="switch"
       label="关闭代理"
       :loading="btnLoading"
-      severity="help"
+      severity="contrast"
       @click="switchMitmProxy(false)"
     />
   </div>
