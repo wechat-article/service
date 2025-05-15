@@ -1,6 +1,6 @@
 {
   "name": "wxdown-service",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "公众号文章下载网站的增强服务",
   "main": "./out/main/index.js",
   "author": "jock<findsource@proton.me>",
