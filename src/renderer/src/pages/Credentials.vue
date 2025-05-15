@@ -38,13 +38,25 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(timer!)
 })
+
+const btnCopyIcon = ref('pi-copy')
+function copy() {
+  navigator.clipboard.writeText(wsAddress.value)
+  btnCopyIcon.value = 'pi-check'
+  setTimeout(() => {
+    btnCopyIcon.value = 'pi-copy'
+  }, 1000)
+}
 </script>
 
 <template>
   <div>
     <section class="relative">
       <Fieldset legend="Credentials 监听地址">
-        <p v-if="wsAddress" class="code">{{ wsAddress }}</p>
+        <p v-if="wsAddress" class="code flex">
+          <span>{{ wsAddress }}</span>
+          <i class="icon pi" :class="btnCopyIcon" @click="copy"></i>
+        </p>
         <p v-else style="color: red">未启动</p>
       </Fieldset>
       <p class="btn">
@@ -58,10 +70,17 @@ onUnmounted(() => {
 .relative {
   position: relative;
 }
+.flex {
+  display: flex;
+  justify-content: space-between;
+}
+.code .icon {
+  cursor: pointer;
+}
 
 .btn {
   position: absolute;
-  top: 25px;
+  top: -10px;
   right: 10px;
 }
 
