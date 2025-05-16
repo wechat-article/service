@@ -1,7 +1,9 @@
 import WebSocket from 'ws'
 import fs from 'node:fs'
+import { BrowserWindow } from 'electron'
 import { log } from './logger'
 import { credentialJsonPath } from './mitmproxy-manager'
+import { parseCredentialData, readFileContent } from './utils'
 
 export class CredentialWatcher {
   private static _port: number | null = null
@@ -33,17 +35,13 @@ export class CredentialWatcher {
     })
 
     // 监听客户端连接
-    server.on('connection', (ws) => {
+    server.on('connection', async (ws) => {
       this._clients.add(ws)
 
-      // 读取本地的credential.json文件
-      fs.readFile(this._file, 'utf8', (err, data) => {
-        if (err) {
-          log(`Error reading ${this._file}:`, err)
-          return
-        }
+      try {
+        const data = await readFileContent(this._file)
         ws.send(data)
-      })
+      } catch (e) {}
 
       // 监听客户端断开连接
       ws.on('close', () => {
@@ -56,13 +54,10 @@ export class CredentialWatcher {
     })
 
     // 监控 credentials.json 文件的内容变化
-    fs.watch(this._file, (event) => {
+    fs.watch(this._file, async (event) => {
       if (event === 'change') {
-        fs.readFile(this._file, 'utf8', (err, data) => {
-          if (err) {
-            log(`Error reading ${this._file}:`, err)
-            return
-          }
+        try {
+          const data = await readFileContent(this._file)
 
           // 检查文件内容是否真的变动
           if (data !== this._lastFileContent) {
@@ -72,16 +67,30 @@ export class CredentialWatcher {
             // 通知所有连接的客户端
             this.notify(data)
           }
-        })
+        } catch (e) {}
       }
     })
+
+    setInterval(async () => {
+      try {
+        const data = await readFileContent(this._file)
+        // 通知所有连接的客户端
+        this.notify(data)
+      } catch (e) {}
+    }, 3000)
   }
 
   private static notify(data: string): void {
+    const credentials = parseCredentialData(data)
+
     this._clients.forEach((ws) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(data)
+        ws.send(credentials)
       }
+    })
+
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send('update:credentials', credentials)
     })
   }
 }

@@ -4,6 +4,7 @@ import {
   findIndexHtmlFiles,
   generatePDf,
   openDirectory,
+  removeBizCredential,
   startFileServer,
   startMitmProxy,
   stopMitmProxy,
@@ -79,5 +80,8 @@ export function handleIPC(): void {
     const dataPath = app.getPath('userData')
     const logsRoot = path.join(dataPath, 'logs')
     return openDirectory(logsRoot)
+  })
+  ipcMain.handle('remove-credential', (_, biz) => {
+    return removeBizCredential(biz)
   })
 }

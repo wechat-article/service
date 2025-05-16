@@ -10,6 +10,8 @@ import { getSystemProxy } from 'os-proxy-config'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { exec } from 'node:child_process'
 import { shell } from 'electron'
+import dayjs from 'dayjs'
+import { credentialJsonPath } from './mitmproxy-manager'
 
 interface Resource {
   fileServer: Map<string, http.Server>
@@ -174,10 +176,10 @@ export async function stopMitmProxy() {
 }
 
 // 验证 mitmproxy 代理设置是否正确
-export async function verifyMitmproxy() {
+export async function verifyMitmproxy(): Promise<boolean> {
   const proxy = await getSystemProxy()
   if (!proxy || !proxy.proxyUrl) {
-    return false
+    return Promise.resolve(false)
   }
 
   return new Promise((resolve) => {
@@ -199,17 +201,132 @@ export async function verifyMitmproxy() {
 }
 
 // 检查 mitmproxy 证书是否已经安装
-export function checkCertificateExists() {
+export function checkCertificateExists(): Promise<boolean> {
   return new Promise((resolve) => {
     exec(
       `security find-certificate -a -c "mitmproxy" /Library/Keychains/System.keychain`,
       (error, stdout, stderr) => {
-        resolve(!error && !stderr && stdout)
+        resolve(!error && !stderr && !!stdout)
       }
     )
   })
 }
 
-export function openDirectory(directory: string) {
+// 打开指定目录
+export function openDirectory(directory: string): Promise<string> {
   return shell.openPath(directory)
+}
+
+export interface ParsedCredential {
+  nickname: string
+  round_head_img: string
+  biz: string
+  uin: string
+  key: string
+  pass_ticket: string
+  wap_sid2: string
+  time: string
+  valid: boolean
+}
+export interface Credential {
+  biz: string
+  url: string
+  set_cookie: string
+  timestamp: number
+  nickname: string
+  round_head_img: string
+}
+
+// 解析原始 credentials 数据
+export function parseCredentialData(data: string): ParsedCredential[] {
+  let result: ParsedCredential[] = []
+  let list: Credential[] = []
+  try {
+    list = JSON.parse(data)
+  } catch (e) {
+    log('解析原始 Credentials 数据失败: ', e as Error)
+    return result
+  }
+
+  for (const item of list.sort((a, b) => b.timestamp - a.timestamp)) {
+    const searchParams = new URL(item.url).searchParams
+    const __biz = searchParams.get('__biz')!
+    const uin = searchParams.get('uin')!
+    const key = searchParams.get('key')!
+    const pass_ticket = searchParams.get('pass_ticket')!
+
+    let wap_sid2: string | null = null
+    const matchResult = item.set_cookie.match(/wap_sid2=(?<wap_sid2>.+?);/)
+    if (matchResult && matchResult.groups && matchResult.groups.wap_sid2) {
+      wap_sid2 = matchResult.groups.wap_sid2
+    }
+    // 验证完整性
+    if (!__biz || !uin || !key || !pass_ticket || !wap_sid2) {
+      continue
+    }
+
+    result.push({
+      nickname: item.nickname,
+      round_head_img: item.round_head_img
+        ? 'https://thirsty-alligator-94.deno.dev?url=' + encodeURIComponent(item.round_head_img)
+        : item.round_head_img,
+      biz: __biz,
+      uin: uin,
+      key: key,
+      pass_ticket: pass_ticket,
+      wap_sid2: wap_sid2,
+      time: dayjs(item.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+      valid: Date.now() < item.timestamp + 1000 * 60 * 25 // 25分钟有效时间
+    })
+  }
+
+  return result
+}
+
+// 删除指定 biz 数据
+export async function removeBizCredential(biz: string): Promise<boolean> {
+  try {
+    const data = await readFileContent(credentialJsonPath)
+
+    let list: Credential[] = []
+    try {
+      list = JSON.parse(data)
+    } catch (e) {
+      log('解析原始 Credentials 数据失败: ', e as Error)
+      return false
+    }
+
+    list = list.filter((item) => item.biz !== biz)
+    await writeFileContent(credentialJsonPath, JSON.stringify(list))
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+// 读取文件内容
+export function readFileContent(filepath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filepath, 'utf8', (err, data) => {
+      if (err) {
+        log(`Error reading ${filepath}:`, err)
+        reject(err)
+        return
+      }
+      resolve(data)
+    })
+  })
+}
+
+// 写入文件内容
+export function writeFileContent(filepath: string, content: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(filepath, content, 'utf-8', (err) => {
+      if (err) {
+        log(`Error writing ${filepath}:`, err)
+        reject(err)
+      }
+      resolve()
+    })
+  })
 }

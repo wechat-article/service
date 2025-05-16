@@ -49,7 +49,7 @@ li > a:hover {
 }
 
 li > a.router-link-active {
-  background: var(--primary-color);
+  background: #0ea5e9;
   color: white;
   font-weight: 500;
 }
