@@ -2,11 +2,14 @@ import { app } from 'electron'
 import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
 import path from 'node:path'
 import { log } from './logger'
-import mitm from '../../resources/mitm/mitm?asset&asarUnpack'
+import mitmMacArm64 from '../../resources/mitm-mac-arm64/mitm?asset&asarUnpack'
+import mitmWinX64 from '../../resources/mitm-win-x64/mitm?asset&asarUnpack'
 import plugin from '../../resources/credential.py?asset&asarUnpack'
 import { onMitmproxyStart, onMitmproxyStop } from './index'
 
 export const credentialJsonPath = path.join(app.getPath('userData'), 'credentials.json')
+
+const mitm = process.platform === 'darwin' ? mitmMacArm64 : mitmWinX64
 
 export class MitmproxyManager {
   private static _process: ChildProcessWithoutNullStreams | null = null
