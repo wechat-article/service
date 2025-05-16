@@ -97,21 +97,21 @@ async function remove(biz: string) {
     </section>
     <section>
       <Fieldset legend="Credentials 列表">
-        <div class="flex flex-col gap-3">
-          <div
-            v-for="credential in credentials"
-            :key="credential.biz"
-            class="flex w-full border rounded-md hover:ring ring-blue-500 hover:shadow-md transition-all duration-300 px-8 py-3 gap-3"
-          >
-            <div class="h-20">
+        <div>
+          <div v-for="credential in credentials" :key="credential.biz" class="credential">
+            <div>
               <img :src="credential.round_head_img" alt="Image" class="h-full" />
             </div>
-            <div class="flex-1">
+            <div style="flex: 1">
               <p>公众号名称：{{ credential.nickname || '--' }}</p>
-              <p>fakeid: {{ credential.biz }}</p>
-              <p>获取时间: {{ credential.time }}</p>
-              <span v-if="credential.valid" class="font-sans font-bold text-green-500">有效</span>
-              <span v-else class="font-sans font-bold text-rose-500">已过期</span>
+              <p>
+                fakeid: <span class="code">{{ credential.biz }}</span>
+              </p>
+              <p>
+                获取时间: <span class="code">{{ credential.time }}</span>
+              </p>
+              <span v-if="credential.valid" style="color: #5be954; font-weight: bold">有效</span>
+              <span v-else style="color: #e95020; font-weight: bold">已过期</span>
             </div>
             <Button
               label="删除"
@@ -157,5 +157,23 @@ async function remove(biz: string) {
     Consolas,
     Liberation Mono,
     monospace;
+}
+
+.credential {
+  border: 1px solid gainsboro;
+  border-radius: 8px;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+}
+.credential:not(:first-child) {
+  margin-top: 20px;
+}
+.credential:hover {
+  border-color: #7b50d2;
+}
+.credential img {
+  width: 100px;
+  margin-right: 30px;
 }
 </style>
